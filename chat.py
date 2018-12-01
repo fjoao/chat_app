@@ -1,35 +1,9 @@
 from threading import Thread
 import sys
 from socket import *
-import tkinter
+from tkinter import *
+from server import *
 
-class server:
-    def __init__(self, servername, serverport):
-        self.servername = servername
-        self.serverport = serverport
-
-    def start(self):
-        serverSocket = socket(AF_INET,SOCK_STREAM)
-        serverSocket.bind(('', self.serverport))
-        serverSocket.listen(1)
-
-    def connections(self):
-        while True:
-            client, client_address = SERVER.accept()
-            client.send(bytes('Enter your name', 'utf8'))
-            Thread(target=client, args=(client)).start()
-
-    def client(self, client):
-        name = client.recv(1024).decode("utf8")
-        client.send(bytes(welcome, "utf8"))
-
-        while True:
-            msg = client.recv(1024)
-            if msg != bytes("quit", "utf8"):
-                client.send(bytes(name+': '+msg))
-            else:
-                client.send(bytes("{quit}", "utf8"))
-                client.close()
 class client:
     def __init__(self, servername, clientport):
         self.servername = servername
@@ -38,14 +12,19 @@ class client:
     def start(self):
         client_socket = socket(AF_INET, SOCK_STREAM)
         ADDR = (self.servername, self.clientport)
+        print(ADDR)
         client_socket.connect(ADDR)
+        recieve = Thread(target=client.receive)
+        recieve.start()
 
-    def recieve():
+
+    def recieve(self):
         while True:
             try:
-                msg = client_socket.recv(BUFSIZ).decode("utf8")
-                msg_list.insert(tkinter.END, msg)
-            except:
+                msg = client_socket.recv(1024).decode("utf8")
+                messages.insert(INSERT, '%s\n' % msg)
+                # msg_list.insert(tkinter.END, msg)
+            except OSError:
                 break
 
     def send(event=None):
@@ -60,33 +39,41 @@ class client:
         my_msg.set("{quit}")
         send()
 
-    top = tkinter.Tk()
-    top.title("Chatter")
 
-    messages_frame = tkinter.Frame(top)
-    my_msg = tkinter.StringVar()
-    my_msg.set("Type your messages here.")
-    scrollbar = tkinter.Scrollbar(messages_frame)
-    msg_list = tkinter.Listbox(messages_frame, height=15, width=50, yscrollcommand=scrollbar.set)
-    scrollbar.pack(side=tkinter.RIGHT, fill=tkinter.Y)
-    msg_list.pack(side=tkinter.LEFT, fill=tkinter.BOTH)
-    msg_list.pack()
-    messages_frame.pack()
-
-    entry_field = tkinter.Entry(top, textvariable=my_msg)
-    entry_field.bind("<Return>", send)
-    entry_field.pack()
-    send_button = tkinter.Button(top, text="Send", command=send)
-    send_button.pack()
-
-    top.protocol("WM_DELETE_WINDOW", on_closing)
 
 if __name__ == "__main__":
-    server = server('localhost', 1200)
-    server.start()
-    server_thread = Thread(target=server.connections)
-    client = client('localhost', 1300)
+
+    window = Tk()
+
+    messages = Text(window)
+    messages.pack()
+
+    input_user = StringVar()
+    input_field = Entry(window, text=input_user)
+    input_field.pack(side=BOTTOM, fill=X)
+    send_button = Button(window, text="Send") #command=self.send)
+    send_button.pack()
+
+    server = server(13000)
+    server_thread = Thread(target=server.connections, args=((messages,)))
+    server_thread.start()
+
+    client = client('127.0.0.1', 12000)
     client.start()
-    receive = Thread(target=receive)
-    receive.start()
-    tkinter.mainloop()
+
+
+
+    def Enter_pressed(event):
+        input_get = input_field.get()
+        print(input_get)
+
+        # label = Label(window, text=input_get)
+        input_user.set('')
+        # label.pack()
+        return "break"
+
+    frame = Frame(window)  # , width=300, height=300)
+    input_field.bind("<Return>", Enter_pressed)
+    frame.pack()
+
+    window.mainloop()
