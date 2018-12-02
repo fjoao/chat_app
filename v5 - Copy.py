@@ -8,20 +8,13 @@ from tkinter import *
 def connections(serverport):
     serverSocket = socket(AF_INET,SOCK_STREAM)
     serverSocket.bind(('', serverport))
-    print(serverport)
     serverSocket.listen(1)
-    print('here')
-
-    # client.send(bytes('Enter your name', 'utf8'))
-    # name = client.recv(1024).decode("utf8")
-    # client.send(bytes(welcome, "utf8"))
 
     while True:
-        print('check')
         client, client_address = serverSocket.accept()
         msg = client.recv(1024).decode("utf8")
         print(msg)
-        messages.insert(INSERT,'Other: '+'%s\n' % msg)
+        messages.insert(INSERT,'Other_user: '+'%s\n' % msg)
         if msg == bytes("quit", "utf8"):
             client.send(bytes("{quit}", "utf8"))
         else:
@@ -47,7 +40,6 @@ def send(event=None):
     msg = input_field.get()
     messages.insert(INSERT,'me: ' '%s\n' % msg)
     input_user.set('')
-    print(msg)
     client_socket.send(bytes(msg.encode()))
     if msg == "{quit}":
             client_socket.close()
@@ -62,7 +54,7 @@ def on_closing(event=None):
 if __name__ == "__main__":
 
     window = Tk()
-
+    window.title("Chatt App")
     messages = Text(window)
     messages.pack()
 
@@ -86,18 +78,12 @@ if __name__ == "__main__":
 
     def Enter_pressed(event):
 
-        #input_get = input_field.get()
-        #print(input_get)
         sendmsg = Thread(target=send)
         sendmsg.start()
 
-        # label = Label(window, text=input_get)
-        #messages.insert(INSERT,'me: ' '%s\n' % input_get)
-        #input_user.set('')
-        # label.pack()
         return "break"
 
-    frame = Frame(window)  # , width=300, height=300)
+    frame = Frame(window)
     input_field.bind("<Return>", Enter_pressed)
     frame.pack()
 
