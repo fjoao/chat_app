@@ -17,7 +17,7 @@ def recieve(ADDR):
             break
 
 def send(event=None):
-    client = ('127.0.0.1', 13000)
+    client = ('127.0.0.1', 12000)
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect(client)
     msg = input_field.get()
@@ -40,13 +40,13 @@ if __name__ == "__main__":
     messages = Text(window)
     messages.pack()
 
-    server_thread = Thread(target=connections, args=((messages, 12000)))
+    server_thread = Thread(target=connections, args=((messages, 13000)))
     server_thread.start()
 
-    # client = ('127.0.0.1', 13000)
-    # recieve = Thread(target=recieve, args=((client,)))
-    # recieve.start()
-
+    client = ('127.0.0.1', 12000)
+    recieve = Thread(target=recieve, args=((client,)))
+    recieve.start()
+    
 
     input_user = StringVar()
     input_field = Entry(window, text=input_user)
@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
 
     def Enter_pressed(event):
-
+        
         input_get = input_field.get()
         print(input_get)
         messages.insert(INSERT,'me: ' '%s\n' % input_get)

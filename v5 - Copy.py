@@ -2,13 +2,37 @@ from threading import Thread
 import sys
 from socket import *
 from tkinter import *
-from server import *
+
+
+
+def connections(serverport):
+    serverSocket = socket(AF_INET,SOCK_STREAM)
+    serverSocket.bind(('', serverport))
+    print(serverport)
+    serverSocket.listen(1)
+    print('here')
+
+    # client.send(bytes('Enter your name', 'utf8'))
+    # name = client.recv(1024).decode("utf8")
+    # client.send(bytes(welcome, "utf8"))
+
+    while True:
+        print('check')
+        client, client_address = serverSocket.accept()
+        msg = client.recv(1024).decode("utf8")
+        print(msg)
+        messages.insert(INSERT,'Other: '+'%s\n' % msg)
+        if msg == bytes("quit", "utf8"):
+            client.send(bytes("{quit}", "utf8"))
+        else:
+            client.close()
+
+
 
 
 def recieve(ADDR):
     while True:
         try:
-            sys.stdout.flush()
             client_socket = socket(AF_INET, SOCK_STREAM)
             client_socket.connect(ADDR)
             msg = client_socket.recv(1024).decode("utf8")
@@ -21,8 +45,10 @@ def send(event=None):
     client_socket = socket(AF_INET, SOCK_STREAM)
     client_socket.connect(client)
     msg = input_field.get()
-    input_field.insert(0,"")  # Clears input field.
-    client_socket.send(bytes(msg, "utf8"))
+    messages.insert(INSERT,'me: ' '%s\n' % msg)
+    input_user.set('')
+    print(msg)
+    client_socket.send(bytes(msg.encode()))
     if msg == "{quit}":
             client_socket.close()
             top.quit()
@@ -40,12 +66,12 @@ if __name__ == "__main__":
     messages = Text(window)
     messages.pack()
 
-    server_thread = Thread(target=connections, args=((messages, 12000)))
+    server_thread = Thread(target=connections, args=((12000,)))
     server_thread.start()
 
-    # client = ('127.0.0.1', 13000)
-    # recieve = Thread(target=recieve, args=((client,)))
-    # recieve.start()
+    client = ('127.0.0.1', 15000)
+    recieve = Thread(target=recieve, args=((client,)))
+    recieve.start()
 
 
     input_user = StringVar()
@@ -60,14 +86,14 @@ if __name__ == "__main__":
 
     def Enter_pressed(event):
 
-        input_get = input_field.get()
-        print(input_get)
-        messages.insert(INSERT,'me: ' '%s\n' % input_get)
+        #input_get = input_field.get()
+        #print(input_get)
         sendmsg = Thread(target=send)
         sendmsg.start()
 
         # label = Label(window, text=input_get)
-        input_user.set('')
+        #messages.insert(INSERT,'me: ' '%s\n' % input_get)
+        #input_user.set('')
         # label.pack()
         return "break"
 
