@@ -1,5 +1,5 @@
 from tkinter import *
-from chat_app.chat import server, client
+#from chat_app.chat import server, client
 
 window = Tk()
 
